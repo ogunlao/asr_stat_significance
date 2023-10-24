@@ -23,10 +23,11 @@ To find out if model Y is better than model X;
     )
 
 
-    absolute_wer_diff, change_wer_bootstrap, ci_wer  = si_obj.compute_significance_wer(num_samples_per_batch=10000, 
-                                                                                       ci=0.95)
+    absolute_wer_diff, change_wer_bootstrap, ci_wer  = si_obj.compute_significance_wer(
+                        num_samples_per_batch=10000, ci=0.95)
     
-    print(f"For WER: {absolute_wer_diff}, low={change_wer_bootstrap-ci_wer}, high={change_wer_bootstrap+ci_wer}, std={ci_wer/1.96}")
+    print(f"For WER: {absolute_wer_diff}, low={change_wer_bootstrap-ci_wer},
+            high={change_wer_bootstrap+ci_wer}, std={ci_wer/1.96}")
 
 ```
 
