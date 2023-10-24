@@ -6,10 +6,11 @@ class StatisticalSignificance:
     """Performs statistical test between two ASR models."""
     def __init__(self, file_a, file_b, sep=",", total_batch=1000,):
         """
-        file_a: (str) path to the files for ASR model A
-        file_a: (str) path to the files for ASR model B
-        sep: (str)separator used in file_a and file_b for error and total number of words. Default is ","
-        total_batch: (int) total amount of bootstrap sampling runs. Note that sampling is done with replacement. Typical values are 10^2, 10^3, 10^4. Default is 10^3.
+        Args:
+            file_a (str): Path to the files for ASR model A.
+            file_a (str): Path to the files for ASR model B.
+            sep (str): Separator used in file_a and file_b for error and total number of words. (default is ",")
+            total_batch (int): Total amount of bootstrap sampling runs. Typical values are 10^2, 10^3, 10^4. (default is 1000)
         """
         
         self.file_a = file_a
@@ -44,7 +45,7 @@ class StatisticalSignificance:
         
                 
     def random_sample(self, data, num_samples,):
-        """ Random sampling with replacement 
+        """ Randomly samples from data with replacement.
         """
         random_index = np.random.randint(0, data.shape[0], size=num_samples)
         return data[random_index]
@@ -76,10 +77,11 @@ class StatisticalSignificance:
                 
     def compute_significance_wer(self, num_samples_per_batch=1000, ci=0.95):
         """
-        num_samples_per_batch: (int) The number of WER/CER samples selected from the files per model. \
-            This is based on the size of the test set.
-        ci: (float) Confidence Interval to be used for computation. \
-            Typical CI include 90%, 95% and 99%. Default is 95%.
+        Args:
+            num_samples_per_batch (int): The number of WER/CER samples selected from the files per model \
+                (default is 1000)
+            ci (float): Confidence Interval to be used for computation. \
+                Typical CI include 90%, 95% and 99% (default is 0.95)
         """
         change_wer_bootstrap, se_bootstrap = self.compute_significance(self.data_wer, 
                                                     num_samples_per_batch,)
