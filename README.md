@@ -20,18 +20,20 @@ To find out if model Y is better than model X;
         file_a="wer_file_for_model_x.txt", 
         file_b="wer_file_for_model_y.txt", # better model
         total_batch=1000,
+        use_gaussian_appr=True,
     )
 
 
-    absolute_wer_diff, change_wer_bootstrap, ci_wer  = si_obj.compute_significance_wer(
-                        num_samples_per_batch=10000, ci=0.95)
-    
-    print(f"For WER: {absolute_wer_diff}, low={change_wer_bootstrap-ci_wer},
-            high={change_wer_bootstrap+ci_wer}, std={ci_wer/1.96}")
+    ci_obj  = si_obj.compute_significance(
+                        num_samples_per_batch=30, ci=0.95)
+    print(ci_obj)
+    print(f"The difference in WER between Model X and Y is significant: ", {ci_obj.is_significant()})
 
 ```
 
-If the confidence intervals' (CI) low and high values computed lie fully on the negative side on the real axis (i.e., if both values are negative), then the difference in WER is statistically significant, therefore, model Y is better than model X.
+## How to interprete the CI values
+
+If the confidence intervals' (CI) low and high values computed lie fully on the negative side on the real axis (i.e., if both values are negative), then the difference in WER is statistically significant. Then, one can say model Y is better than model X.
 
 ## Function parameters
 
