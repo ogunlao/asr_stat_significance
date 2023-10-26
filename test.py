@@ -18,6 +18,7 @@ def func(*x, axis=0):
 
 if __name__ == "__main__":
     np.random.seed(42)
+    
     confidence_interval = 0.95
     num_samples_per_batch = 40 # samples will be selected with replacement
     
@@ -28,18 +29,18 @@ if __name__ == "__main__":
         sep="|",
     )
     
-    absolute_wer_diff, change_wer_bootstrap, ci_wer  = si_obj.compute_significance_wer(num_samples_per_batch=40, 
-                                                                                       ci=confidence_interval)
-    
-    print(f"StatisticalSignificance: low={change_wer_bootstrap-ci_wer}, high={change_wer_bootstrap+ci_wer}, std_err={ci_wer/1.96}")
+    ci_obj  = si_obj.compute_significance(si_obj.data_wer, num_samples_per_batch=40, ci=confidence_interval)
+    print(ci_obj)
     
     # compare to scipy bootstrap
     data = si_obj.data_wer
     res = bootstrap((data,), func, confidence_level=confidence_interval, 
                     method="bca", vectorized=True, batch=10000)
-    print(f"Scipy: low={res.confidence_interval.low}, high={res.confidence_interval.high}, std_err={res.standard_error}")
+    print(res)
     
-    assert np.sign(change_wer_bootstrap-ci_wer) == np.sign(res.confidence_interval.low)
-    assert np.sign(change_wer_bootstrap+ci_wer) == np.sign(res.confidence_interval.high)
+    assert np.sign(ci_obj.ci_low) == np.sign(res.confidence_interval.low)
+    assert np.sign(ci_obj.ci_high) == np.sign(res.confidence_interval.high)
+    
+    print("Model Y is not significant:", ci_obj.is_significant() == False)
     
     print("Test passed !!!")
