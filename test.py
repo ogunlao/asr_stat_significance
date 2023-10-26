@@ -27,12 +27,13 @@ if __name__ == "__main__":
         file_b="test_files/wer_model_y.txt", #better model
         total_batch=10000,
         sep="|",
+        use_gaussian_appr=True
     )
     
     ci_obj  = si_obj.compute_significance(si_obj.data_wer, num_samples_per_batch=40, ci=confidence_interval)
     print(ci_obj)
     
-    # compare to scipy bootstrap
+    # compare to scipy bootstrap method
     data = si_obj.data_wer
     res = bootstrap((data,), func, confidence_level=confidence_interval, 
                     method="bca", vectorized=True, batch=10000)

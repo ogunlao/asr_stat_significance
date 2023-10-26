@@ -2,16 +2,16 @@ import random
 import numpy as np
 from scipy.stats import bootstrap
 
-
 class StatisticalSignificance:
     """Performs statistical test between two ASR models."""
-    def __init__(self, file_a, file_b, sep=",", total_batch=1000,):
+    def __init__(self, file_a, file_b, sep=",", total_batch=1000, use_gaussian_appr=False,):
         """
         Args:
             file_a (str): Path to the files for ASR model A.
             file_a (str): Path to the files for ASR model B.
             sep (str): Separator used in file_a and file_b for error and total number of words. (default is ",")
             total_batch (int): Total amount of bootstrap sampling runs. Typical values are 10^2, 10^3, 10^4. (default is 1000)
+            use_gaussian_appr (bool): Either to manually compute empirical percentiles or use gaussian approximation. (default is False)
         """
         
         self.file_a = file_a
@@ -24,6 +24,8 @@ class StatisticalSignificance:
             0.95: 1.960,
             0.99: 2.576,
         }
+        self.use_gaussian_appr = use_gaussian_appr
+        
         with open(file_a, "r+") as f:
             for line in f:
                 edit_wer, num_words = line.split(sep)
@@ -81,19 +83,25 @@ class StatisticalSignificance:
         """
         
         assert ci < 1.0, f"Sorry ci has to be less than 1.0 . Given ci = {ci}"
+        if self.use_gaussian_appr:
+            assert ci in self.z_scores, "Sorry, only confidence intervals of 0.90, 0.95 or 0.99 are supported if `self.use_gaussian_appr=True`"
+            z_score = float(self.z_scores[ci])
         
         change_in_wer_arr = self.bootstap_sampling(data, num_samples_per_batch)
         
         # compute standard_error
         wer_diff_bootstrap = np.mean(change_in_wer_arr)
-        se_bootstrap = self.standard_error(change_in_wer_arr, 
+        std_err_bootstrap = self.standard_error(change_in_wer_arr, 
                                            wer_change_mean=wer_diff_bootstrap)
         
         # compute ci intervals
-        interval = (1.0 - ci)/2
-        ci_high, ci_low = np.percentile(change_in_wer_arr, [interval*100, (1.0-interval)*100])
+        if self.use_gaussian_appr:
+            ci_low, ci_high = wer_diff_bootstrap + z_score*std_err_bootstrap, wer_diff_bootstrap - z_score*std_err_bootstrap
+        else:
+            interval = (1.0 - ci)/2
+            ci_low, ci_high = np.percentile(change_in_wer_arr, [(1.0-interval)*100], interval*100)
         
-        return WER_DiffCI(wer_diff_bootstrap, ci_low, ci_high, se_bootstrap, self.absolute_wer_diff)
+        return WER_DiffCI(wer_diff_bootstrap, ci_low, ci_high, std_err_bootstrap, self.absolute_wer_diff)
                         
     
 class WER_DiffCI:
