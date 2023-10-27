@@ -89,24 +89,24 @@ class StatisticalSignificance:
         return np.array(change_in_wer_arr)
     
     def compute_significance(self, num_samples_per_batch=None, num_samples_per_block=None, 
-                             ci=0.95, use_blockwise_bootstrap=False,):
+                             confidence_level=0.95, use_blockwise_bootstrap=False,):
         """
         Args:
             num_samples_per_batch (int): The number of WER/CER samples selected from the files per model
             num_samples_per_block (int): No. of wer samples to bootstrap from each block when `use_blockwise_bootstrap=True`
-            ci (float): Confidence Interval to be used for computation. Typical CI include 90%, 95% and 99% (default is 0.95)
+            confidence_level (float): Confidence level to be used for computation. Typical levels include 90%, 95% and 99% (default is 0.95)
             use_blockwise_bootstrap (bool): Perform bootstrap sampling based on blocks. (default is False)
         """
         
-        assert ci < 1.0, f"Sorry, ci cannot be greater than 1.0 . Given ci = {ci}"
+        assert confidence_level < 1.0, f"Sorry, confidence_level cannot be greater than 1.0 . Given confidence_level = {confidence_level}"
         if use_blockwise_bootstrap:
             assert num_samples_per_block is not None, "num_samples_per_block cannot be None when `use_blockwise_bootstrap=True`"
         else:
             assert num_samples_per_batch is not None, "num_samples_per_batch cannot be None when `use_blockwise_bootstrap=False`"
             
         if self.use_gaussian_appr:
-            assert ci in self.z_scores, "Sorry, only confidence intervals of 0.90, 0.95 or 0.99 are supported if `self.use_gaussian_appr=True`"
-            z_score = float(self.z_scores[ci])
+            assert confidence_level in self.z_scores, "Sorry, only confidence levels in 0.90, 0.95 and 0.99 are supported if `self.use_gaussian_appr=True`"
+            z_score = float(self.z_scores[confidence_level])
         
         data = self.data_wer
         absolute_wer_diff = None
@@ -123,23 +123,24 @@ class StatisticalSignificance:
         std_err_bootstrap = self.standard_error(change_in_wer_arr, 
                                            wer_change_mean=wer_diff_bootstrap)
         
-        # compute ci intervals
+        # compute confidence level intervals
         if self.use_gaussian_appr:
             ci_low, ci_high = wer_diff_bootstrap + z_score*std_err_bootstrap, wer_diff_bootstrap - z_score*std_err_bootstrap
         else:
-            interval = (1.0 - ci)/2
+            interval = (1.0 - confidence_level)/2
             ci_low, ci_high = np.percentile(change_in_wer_arr, [(1.0-interval)*100], interval*100)
         
-        return WER_DiffCI(wer_diff_bootstrap, ci_low, ci_high, std_err_bootstrap, absolute_wer_diff)
+        return WER_DiffCI(wer_diff_bootstrap, ci_low, ci_high, std_err_bootstrap, confidence_level, absolute_wer_diff)
     
 class WER_DiffCI:
-    def __init__(self, wer_diff_bootstrap, ci_high, ci_low, std_err, wer_diff_absolute=None,):
+    def __init__(self, wer_diff_bootstrap, ci_high, ci_low, std_err, confidence_level, wer_diff_absolute=None, ):
         """
         wer_diff_bootstrap (float): The mean of the botstrap wer difference.
         ci_high (float): High value of ci on the real axis.
         ci_low (float): Low value of ci on the real axis.
         std_err (float): Standard error of the wer difference computed from the bootstrap samples.
         wer_diff_absolute (float): Absolute wer difference value computed using the mean of the wer. (default is None)
+        confidence_level (float): Confidence level used to get ci_low and ci_high.
         """
         
         self.ci_low = ci_low
@@ -147,9 +148,10 @@ class WER_DiffCI:
         self.std_err = std_err
         self.wer_diff_bootstrap = wer_diff_bootstrap
         self.wer_diff_absolute = wer_diff_absolute
+        self.confidence_level = confidence_level
     
     def is_significant(self):
         return (self.ci_low < 0) and (self.ci_high < 0)
     
     def __repr__(self):
-        return f"WER_DiffCI(wer_diff_bootstrap={self.wer_diff_bootstrap}, ci_low={self.ci_low}, ci_high={self.ci_high}, std_err={self.std_err})"
+        return f"WER_DiffCI(wer_diff_bootstrap={self.wer_diff_bootstrap}, ci_low={self.ci_low}, ci_high={self.ci_high}, std_err={self.std_err}, confidence_level={self.confidence_level})"
