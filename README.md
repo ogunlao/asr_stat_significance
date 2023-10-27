@@ -17,17 +17,25 @@ To find out if model Y is better than model X;
     from asr_stat_significance import StatisticalSignificance
 
     si_obj = StatisticalSignificance(
-        file_a="wer_file_for_model_x.txt", 
-        file_b="wer_file_for_model_y.txt", # better model
+        file_path="wer_file.txt", 
         total_batch=1000,
         use_gaussian_appr=True,
     )
-
-
     ci_obj  = si_obj.compute_significance(
                         num_samples_per_batch=30, ci=0.95)
     print(ci_obj)
     print(f"The difference in WER between Model X and Y is significant: ", {ci_obj.is_significant()})
+
+    # bootstrap sampling to be performed based on some criteria such as speakers, gender, or age.
+    si_obj_block = StatisticalSignificance(
+        file_path="wer_file_block.txt", 
+        total_batch=1000,
+        use_gaussian_appr=True,
+    )
+    ci_obj_block  = si_obj_block.compute_significance(num_samples_per_batch=30, 
+                                                ci=0.95, use_blockwise_bootstrap=True,)
+    print(ci_obj_block)
+    print(f"The difference in WER between Model X and Y is significant: ", {ci_obj_block.is_significant()})
 
 ```
 
@@ -39,8 +47,4 @@ If the confidence intervals' (CI) low and high values computed lie fully on the 
 
 - ci: Confidence Interval to be used for computation. Typical CI include 90%, 95% and 99%. Default is 95%.
 - total_batch: total amount of bootstrap sampling runs. Note that sampling is done with replacement. Typical values are 10^2, 10^3, 10^4. Default is 10^3.
-- num_samples_per_batch: The number of WER/CER samples selected from the files per model. This is based on the size of the test set.
-
-## TODO
-
-- Allow bootstrap sampling to be performed based on some criteria such as speakers, gender, or age.
+- num_samples_per_batch: The number of WER/CER data selected to compute the mean. If `use_blockwise_bootstrap=True`, then, we compute num_samples_per_block=num_samples_per_batch//total_num_of_blocks. Value is based on the size of the test set.
