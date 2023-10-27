@@ -47,4 +47,4 @@ If the confidence intervals' (CI) low and high values computed lie fully on the 
 
 - ci: Confidence Interval to be used for computation. Typical CI include 90%, 95% and 99%. Default is 95%.
 - total_batch: total amount of bootstrap sampling runs. Note that sampling is done with replacement. Typical values are 10^2, 10^3, 10^4. Default is 10^3.
-- num_samples_per_batch: The number of WER/CER data selected to compute the mean. If `use_blockwise_bootstrap=True`, then, we compute num_samples_per_block=num_samples_per_batch//total_num_of_blocks. Value is based on the size of the test set.
+- num_samples_per_batch: The number of WER/CER data selected to compute the mean. If `use_blockwise_bootstrap=True`, then, we compute `num_samples_per_block=num_samples_per_batch//total_num_of_blocks`. Value should be based on the size of the test set.
