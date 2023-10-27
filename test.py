@@ -33,7 +33,7 @@ if __name__ == "__main__":
     print(ci_obj)
     
     # compare to scipy bootstrap method
-    data = si_obj.data_wer[0]
+    data = si_obj.data_wer["default"]
     res = bootstrap((data,), func, confidence_level=confidence_interval, 
                     method="bca", vectorized=True, batch=10000)
     print(res)

@@ -28,11 +28,11 @@ class StatisticalSignificance:
         data_wer = {}
         with open(file_path, "r+") as f:
             for line in f:
-                block_data = line.split(sep)
+                block_data = line.strip().split(sep)
                 if len(block_data) == 3:
                     # all data assumed to belong to only one block
                     edit_wer_a, edit_wer_b, num_words = block_data
-                    block = 0 # default block
+                    block = "default"
                 elif len(block_data) == 4:
                     # has information on blocks
                     edit_wer_a, edit_wer_b, num_words, block = block_data
@@ -43,7 +43,7 @@ class StatisticalSignificance:
                     data_wer[block] = [(int(edit_wer_a), int(edit_wer_b), int(num_words))]
         
         for block in data_wer:
-            data_wer[block]  = np.array(data_wer[block])
+            data_wer[block]  = np.vstack(data_wer[block])
         
         return data_wer
         
@@ -80,7 +80,7 @@ class StatisticalSignificance:
             for block in data:
                 block_sample_data = self.random_sample(data[block], num_samples=num_samples_per_block,)
                 sample_data.append(block_sample_data)
-            sample_data = np.array(sample_data)
+            sample_data = np.vstack(sample_data)
             
             # compute batch wer diff
             change_in_wer_batch = self.wer_change(sample_data)
@@ -88,23 +88,27 @@ class StatisticalSignificance:
             
         return np.array(change_in_wer_arr)
     
-    def compute_significance(self, num_samples_per_batch, ci,  use_blockwise_bootstrap=False,):
+    def compute_significance(self, num_samples_per_batch=None, num_samples_per_block=None, 
+                             ci=0.95, use_blockwise_bootstrap=False,):
         """
         Args:
-            num_samples_per_batch (int): The number of WER/CER samples selected from the files per model \
-                (default is 1000)
-            ci (float): Confidence Interval to be used for computation. \
-                Typical CI include 90%, 95% and 99% (default is 0.95)
-            use_blockwise_bootstrap (bool): Perform bootstrap sampling based on blocks e.g. speakers. (default is False)
+            num_samples_per_batch (int): The number of WER/CER samples selected from the files per model
+            num_samples_per_block (int): No. of wer samples to bootstrap from each block when `use_blockwise_bootstrap=True`
+            ci (float): Confidence Interval to be used for computation. Typical CI include 90%, 95% and 99% (default is 0.95)
+            use_blockwise_bootstrap (bool): Perform bootstrap sampling based on blocks. (default is False)
         """
         
-        assert ci < 1.0, f"Sorry ci has to be less than 1.0 . Given ci = {ci}"
+        assert ci < 1.0, f"Sorry, ci cannot be greater than 1.0 . Given ci = {ci}"
+        if use_blockwise_bootstrap:
+            assert num_samples_per_block is not None, "num_samples_per_block cannot be None when `use_blockwise_bootstrap=True`"
+        else:
+            assert num_samples_per_batch is not None, "num_samples_per_batch cannot be None when `use_blockwise_bootstrap=False`"
+            
         if self.use_gaussian_appr:
             assert ci in self.z_scores, "Sorry, only confidence intervals of 0.90, 0.95 or 0.99 are supported if `self.use_gaussian_appr=True`"
             z_score = float(self.z_scores[ci])
         
         data = self.data_wer
-        num_samples_per_block = num_samples_per_batch//len(data)
         absolute_wer_diff = None
         if use_blockwise_bootstrap:
             change_in_wer_arr = self.bootstap_sampling_block(data, num_samples_per_block)
@@ -130,6 +134,14 @@ class StatisticalSignificance:
     
 class WER_DiffCI:
     def __init__(self, wer_diff_bootstrap, ci_high, ci_low, std_err, wer_diff_absolute=None,):
+        """
+        wer_diff_bootstrap (float): The mean of the botstrap wer difference.
+        ci_high (float): High value of ci on the real axis.
+        ci_low (float): Low value of ci on the real axis.
+        std_err (float): Standard error of the wer difference computed from the bootstrap samples.
+        wer_diff_absolute (float): Absolute wer difference value computed using the mean of the wer. (default is None)
+        """
+        
         self.ci_low = ci_low
         self.ci_high = ci_high
         self.std_err = std_err

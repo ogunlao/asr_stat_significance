@@ -6,7 +6,13 @@ The implementation is based on these two papers; [Statistical Testing on ASR Per
 
 ## How to use
 
-For each model X and Y, compute total errors and count of words for each sentence in your test set. Then save them in a text file with a seperator. For example, if sentence 1 has total errors of 5 while the total number of words is 20, it is saved with 5|20 where "|" is used as a separator. You can checkout the `test_files` in this repo for an example.
+For each model X and Y, compute total errors and count of words for each sentence in your test set. Then save them in a text file with a seperator. For example, for a sentence in the test set;
+
+model A: 5 errors
+model B: 10 errors
+total number of words in sentence: 12
+
+Save as `5|10|12` where "|" is used as a separator. Checkout the `test_files` directory in this repo for an example file.
 
 To find out if model Y is better than model X;
 
@@ -41,10 +47,11 @@ To find out if model Y is better than model X;
 
 ## How to interprete the CI values
 
-If the confidence intervals' (CI) low and high values computed lie fully on the negative side on the real axis (i.e., if both values are negative), then the difference in WER is statistically significant. Then, one can say model Y is better than model X.
+If the computed CI low and CI high values lie fully on the negative side on the real axis (i.e., if both values are negative), then, the difference in WER is statistically significant. Therefore, one can say model Y is better than model X.
 
 ## Function parameters
 
 - ci: Confidence Interval to be used for computation. Typical CI include 90%, 95% and 99%. Default is 95%.
 - total_batch: total amount of bootstrap sampling runs. Note that sampling is done with replacement. Typical values are 10^2, 10^3, 10^4. Default is 10^3.
-- num_samples_per_batch: The number of WER/CER data selected to compute the mean. If `use_blockwise_bootstrap=True`, then, we compute `num_samples_per_block=num_samples_per_batch//total_num_of_blocks`. Value should be based on the size of the test set.
+- num_samples_per_batch: The number of WER/CER data selected for each batch. Value should be based on the size of the test set.
+- num_samples_per_block: If `use_blockwise_bootstrap=True`, then, this is the number of samples to collect from each block during bootstrap sampling.
