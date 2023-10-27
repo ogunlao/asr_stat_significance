@@ -12,7 +12,9 @@ model A: 5 errors
 model B: 10 errors
 total number of words in sentence: 12
 
-Save as `5|10|12` where "|" is used as a separator. Checkout the `test_files` directory in this repo for an example file.
+Save as `5|10|12` where "|" is used as a separator. If you intend to use blockwise sampling, e.g. sampling on speakers, then save as `5|10|12|speaker_id`
+
+Checkout the `test_files` directory in this repo for example files.
 
 To find out if model Y is better than model X;
 
@@ -38,7 +40,7 @@ To find out if model Y is better than model X;
         total_batch=1000,
         use_gaussian_appr=True,
     )
-    ci_obj_block  = si_obj_block.compute_significance(num_samples_per_batch=30, 
+    ci_obj_block  = si_obj_block.compute_significance(num_samples_per_block=2, 
                                                 ci=0.95, use_blockwise_bootstrap=True,)
     print(ci_obj_block)
     print(f"The difference in WER between Model X and Y is significant: ", {ci_obj_block.is_significant()})
