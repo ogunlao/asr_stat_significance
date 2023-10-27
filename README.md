@@ -18,11 +18,14 @@ Checkout the `test_files` directory for example files.
 
 To find out if model Y is better than model X;
 
+```bash
+    cd asr_stat_significance
+```
+
 ```python
     import numpy as np
     np.random.seed(42)
     
-    cd wer_stat_significance
     from asr_stat_significance import StatisticalSignificance
 
     si_obj = StatisticalSignificance(
@@ -42,7 +45,7 @@ OR when you would like to perform bootstrap sampling based on some criteria such
     import numpy as np
     np.random.seed(42)
     
-    cd wer_stat_significance
+    cd asr_stat_significance
     from asr_stat_significance import StatisticalSignificance
 
     si_obj_block = StatisticalSignificance(
