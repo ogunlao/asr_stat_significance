@@ -39,13 +39,12 @@ To find out if model Y is better than model X;
     print(f"The difference in WER between Model X and Y is significant: ", {ci_obj.is_significant()})
 ```
 
-OR when you would like to perform bootstrap sampling based on some criteria such as speaker, gender, or age.
+OR when you would like to perform bootstrap sampling based on some criteria such as speaker, gender, or age, etc.
 
 ```python
     import numpy as np
     np.random.seed(42)
     
-    cd asr_stat_significance
     from asr_stat_significance import StatisticalSignificance
 
     si_obj_block = StatisticalSignificance(
