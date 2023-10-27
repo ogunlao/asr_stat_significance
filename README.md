@@ -22,6 +22,7 @@ To find out if model Y is better than model X;
     import numpy as np
     np.random.seed(42)
     
+    cd wer_stat_significance
     from asr_stat_significance import StatisticalSignificance
 
     si_obj = StatisticalSignificance(
@@ -33,8 +34,16 @@ To find out if model Y is better than model X;
                         num_samples_per_batch=30, ci=0.95)
     print(ci_obj)
     print(f"The difference in WER between Model X and Y is significant: ", {ci_obj.is_significant()})
+```
 
-    # bootstrap sampling to be performed based on some criteria such as speakers, gender, or age.
+OR bootstrap sampling to be performed based on some criteria such as speakers, gender, or age.
+
+```python
+    import numpy as np
+    np.random.seed(42)
+    
+    from asr_stat_significance import StatisticalSignificance
+
     si_obj_block = StatisticalSignificance(
         file_path="wer_file_block.txt", 
         total_batch=1000,
