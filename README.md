@@ -1,6 +1,6 @@
-# WER Statistical Significance Testing
+# ASR Statistical Significance Testing
 
-Perform statistical testing on word error rates between ASR models using the bootstrap method. This library computes the confidence interval (CI) between the WER difference of two competing Automatic speech recognition (ASR) models X and Y.
+Perform statistical testing on word error rates(WER) between ASR models using the bootstrap method. This library computes the confidence interval (CI) between the WER difference of two competing Automatic speech recognition (ASR) models X and Y.
 
 The implementation is based on these two papers; [Statistical Testing on ASR Performance via Blockwise Bootstrap](https://ieeexplore.ieee.org/abstract/document/1326009) and [Statistical Testing on ASR Performance via Blockwise Bootstrap](https://arxiv.org/abs/1912.09508).
 
